@@ -9,7 +9,7 @@
   <meta property="og:title" content="在线 HTML/JS 运行器">
   <meta property="og:description" content="在线 HTML/JS 运行器，支持实时编辑和代码预览，帮助开发者快速测试和运行 HTML/JS 代码。">
   <meta property="og:image" content="https://www.wangxiansheng.com/images/logo.png">
-  <meta property="og:url" content="https://www.wangxiansheng.com">
+  <meta property="og:url" content="https://zaixiangongju.wangxiansheng.com/try.html">
   <meta name="author" content="王先生">
   <title>在线 HTML/JS 运行器</title>
 
@@ -52,7 +52,7 @@
       height: 100%;
       font-family: monospace;
       font-size: 14px;
-      padding: 12px;
+      padding: 12px; /* 保留适当的间距 */
       border-radius: 6px;
       border: 1px solid #ccc;
       resize: vertical;
@@ -63,6 +63,7 @@
       top: 0;
       left: 0;
       caret-color: #f8f8f2;
+      box-sizing: border-box; /* 保证 padding 和 border 不影响元素总宽高 */
     }
 
     .button-container {
