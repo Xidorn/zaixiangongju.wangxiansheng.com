@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="在线 HTML/JS 运行器，支持实时编辑和代码预览，帮助开发者快速测试和运行 HTML/JS 代码。">
-  <meta name="keywords" content="HTML, JS, 代码运行器, 在线编辑器, 代码预览, 开发工具">
+  <meta name="description" content="在线 HTML/JS 运行器，支持编辑和运行 HTML/JS 代码。">
+  <meta name="keywords" content="HTML, JS, 代码运行器, 在线编辑器, 开发工具">
   <meta name="robots" content="index, follow">
   <meta property="og:title" content="在线 HTML/JS 运行器">
-  <meta property="og:description" content="在线 HTML/JS 运行器，支持实时编辑和代码预览，帮助开发者快速测试和运行 HTML/JS 代码。">
+  <meta property="og:description" content="在线 HTML/JS 运行器，支持编辑和运行 HTML/JS 代码。">
   <meta property="og:image" content="https://www.wangxiansheng.com/images/logo.png">
   <meta property="og:url" content="https://zaixiangongju.wangxiansheng.com/try.html">
   <meta name="author" content="王先生">
@@ -36,7 +36,7 @@
       max-width: 1200px;
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
+      justify-content: center;
       gap: 20px;
       margin-bottom: 20px;
     }
@@ -64,14 +64,6 @@
       left: 0;
       caret-color: #f8f8f2;
       box-sizing: border-box; 
-    }
-
-    iframe {
-      width: 100%;
-      height: 500px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background-color: white;
     }
 
     .button-container {
@@ -118,17 +110,12 @@
   <div class="editor-wrapper">
     <textarea id="code" placeholder="在这里输入 HTML/JS 代码..."></textarea>
   </div>
-
-  <!-- 实时预览区 -->
-  <div class="editor-wrapper">
-    <iframe id="preview"></iframe>
-  </div>
 </div>
 
 <div class="button-container">
+  <!-- 仅保留运行按钮 -->
   <button onclick="runCode()">运行</button>
   <button onclick="clearCode()">清除</button>
-  <button onclick="runCodeNewTab()">新标签打开运行</button>
 </div>
 
 <footer>© <span id="year"></span> <a href="https://www.wangxiansheng.com" target="_blank">王先生</a> 版权所有</footer>
@@ -138,36 +125,14 @@
   document.getElementById('year').textContent = new Date().getFullYear();
 
   const codeArea = document.getElementById('code');
-  const preview = document.getElementById('preview');
-  const iframeDoc = preview.contentDocument || preview.contentWindow.document;
-
-  // 实时更新预览窗口
-  codeArea.addEventListener('input', () => {
-    const code = codeArea.value;
-    iframeDoc.open();
-    iframeDoc.write(code);
-    iframeDoc.close();
-  });
 
   // 清空输入
   function clearCode() {
     codeArea.value = '';
-    const iframeDoc = preview.contentDocument || preview.contentWindow.document;
-    iframeDoc.open();
-    iframeDoc.write('');
-    iframeDoc.close();
   }
 
-  // 在当前页面预览代码
+  // 运行代码并在当前页面展示
   function runCode() {
-    const code = codeArea.value;
-    iframeDoc.open();
-    iframeDoc.write(code);
-    iframeDoc.close();
-  }
-
-  // 新标签打开完整渲染
-  function runCodeNewTab() {
     const code = codeArea.value;
     const newWindow = window.open("", "_blank");
     newWindow.document.open();
