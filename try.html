@@ -44,7 +44,7 @@
     .editor-wrapper {
       flex: 1;
       position: relative;
-      height: 500px; /* Increased height for textarea */
+      height: 500px;
     }
 
     textarea {
@@ -52,7 +52,7 @@
       height: 100%;
       font-family: monospace;
       font-size: 14px;
-      padding: 12px; /* 保留适当的间距 */
+      padding: 12px;
       border-radius: 6px;
       border: 1px solid #ccc;
       resize: vertical;
@@ -63,7 +63,15 @@
       top: 0;
       left: 0;
       caret-color: #f8f8f2;
-      box-sizing: border-box; /* 保证 padding 和 border 不影响元素总宽高 */
+      box-sizing: border-box; 
+    }
+
+    iframe {
+      width: 100%;
+      height: 500px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background-color: white;
     }
 
     .button-container {
@@ -106,14 +114,21 @@
 <h2>在线 HTML/JS 运行器</h2>
 
 <div class="editor-container">
+  <!-- 编辑区 -->
   <div class="editor-wrapper">
     <textarea id="code" placeholder="在这里输入 HTML/JS 代码..."></textarea>
+  </div>
+
+  <!-- 实时预览区 -->
+  <div class="editor-wrapper">
+    <iframe id="preview"></iframe>
   </div>
 </div>
 
 <div class="button-container">
-  <button onclick="runCodeNewTab()">运行</button>
+  <button onclick="runCode()">运行</button>
   <button onclick="clearCode()">清除</button>
+  <button onclick="runCodeNewTab()">新标签打开运行</button>
 </div>
 
 <footer>© <span id="year"></span> <a href="https://www.wangxiansheng.com" target="_blank">王先生</a> 版权所有</footer>
@@ -123,10 +138,32 @@
   document.getElementById('year').textContent = new Date().getFullYear();
 
   const codeArea = document.getElementById('code');
+  const preview = document.getElementById('preview');
+  const iframeDoc = preview.contentDocument || preview.contentWindow.document;
+
+  // 实时更新预览窗口
+  codeArea.addEventListener('input', () => {
+    const code = codeArea.value;
+    iframeDoc.open();
+    iframeDoc.write(code);
+    iframeDoc.close();
+  });
 
   // 清空输入
   function clearCode() {
     codeArea.value = '';
+    const iframeDoc = preview.contentDocument || preview.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write('');
+    iframeDoc.close();
+  }
+
+  // 在当前页面预览代码
+  function runCode() {
+    const code = codeArea.value;
+    iframeDoc.open();
+    iframeDoc.write(code);
+    iframeDoc.close();
   }
 
   // 新标签打开完整渲染
