@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML在线运行</title>
+    <title>HTML 在线运行 - 王先生</title>
     <style>
         :root {
-            --accent-color: #7000ff;
-            --accent-hover: #8a2be2;
-            --bg-color: #050505;
-            --panel-bg: rgba(20, 20, 25, 0.8);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-main: #e0e0e0;
-            --text-dim: #888;
-            --editor-font: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+            --apple-bg: #f5f5f7;
+            --apple-card: rgba(255, 255, 255, 0.8);
+            --apple-text: #1d1d1f;
+            --apple-blue: #0071e3;
+            --apple-gray: #86868b;
+            --border-radius: 18px;
+            --editor-font: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(circle at top right, #1a1a2e, #050505);
-            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Myriad Set Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -29,84 +28,74 @@
             padding: 40px 20px;
         }
 
-        /* 顶部标题设计 */
+        /* 标题样式 */
         header {
-            margin-bottom: 40px;
             text-align: center;
+            margin-bottom: 30px;
         }
 
         header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(to right, #fff, #7000ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+            font-size: 2.4rem;
+            font-weight: 600;
+            letter-spacing: -0.022em;
         }
 
-        header p {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* 编辑器容器 */
-        .glass-panel {
+        /* 主编辑器卡片 - Apple 典型的悬浮感 */
+        .apple-container {
             width: 100%;
             max-width: 1000px;
-            background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: var(--apple-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-            transition: border-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
-        .glass-panel:focus-within {
-            border-color: var(--accent-color);
-        }
-
-        /* 编辑器头部状态栏 */
-        .panel-top {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 15px 25px;
+        /* 编辑器顶部窗口栏 */
+        .window-bar {
+            height: 52px;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.5);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        .status-pill {
-            background: rgba(112, 0, 255, 0.1);
-            color: var(--accent-color);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .window-controls { display: flex; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        #stats {
+            font-size: 13px;
+            color: var(--apple-gray);
+            font-weight: 400;
         }
 
-        /* 代码区域 */
-        .editor-wrapper {
+        /* 编辑器主体 */
+        .editor-main {
             display: flex;
-            height: 500px;
-            position: relative;
+            height: 550px;
+            background: transparent;
         }
 
         .line-numbers {
-            width: 60px;
+            width: 50px;
             padding-top: 20px;
             text-align: right;
-            padding-right: 15px;
+            padding-right: 12px;
             font-family: var(--editor-font);
             font-size: 14px;
-            color: #444;
-            background: rgba(0,0,0,0.2);
+            color: #d2d2d7;
+            background: rgba(0, 0, 0, 0.02);
             user-select: none;
-            overflow: hidden;
+            border-right: 1px solid rgba(0, 0, 0, 0.03);
         }
 
         textarea#code {
@@ -114,114 +103,105 @@
             background: transparent;
             border: none;
             outline: none;
-            color: #dcdcdc;
             padding: 20px;
             font-family: var(--editor-font);
             font-size: 15px;
             line-height: 1.6;
+            color: var(--apple-text);
             resize: none;
-            caret-color: var(--accent-color);
+            tab-size: 4;
         }
 
-        /* 按钮设计 */
-        .action-bar {
+        /* 按钮设计 - Apple 风格的胶囊按钮 */
+        .action-group {
+            margin-top: 30px;
             display: flex;
             gap: 16px;
-            margin-top: 30px;
         }
 
         .btn {
-            padding: 14px 32px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid transparent;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            border: none;
         }
 
         .btn-run {
-            background: var(--accent-color);
+            background-color: var(--apple-blue);
             color: white;
-            box-shadow: 0 10px 20px -5px rgba(112, 0, 255, 0.5);
         }
 
         .btn-run:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 15px 25px -5px rgba(112, 0, 255, 0.6);
+            background-color: #0077ed;
+            transform: scale(1.03);
+            box-shadow: 0 8px 15px rgba(0, 113, 227, 0.3);
         }
 
         .btn-clear {
-            background: transparent;
-            color: var(--text-dim);
-            border-color: var(--border-color);
+            background-color: #e8e8ed;
+            color: var(--apple-text);
         }
 
         .btn-clear:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background-color: #d2d2d7;
         }
 
+        /* 版权信息 */
         footer {
             margin-top: auto;
-            padding: 40px;
-            color: #555;
-            font-size: 0.85rem;
+            padding: 40px 0;
+            text-align: center;
+            color: var(--apple-gray);
+            font-size: 13px;
         }
 
-        footer a { color: var(--accent-color); text-decoration: none; }
+        footer a {
+            color: var(--apple-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer a:hover { text-decoration: underline; }
 
         /* 滚动条美化 */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #444; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <header>
-        <h1>王<span style="color:var(--accent-color)">先生</span></h1>
-        <p>HTML在线运行</p>
+        <h1>HTML 在线运行</h1>
     </header>
 
-    <div class="glass-panel">
-        <div class="panel-top">
-            <div style="display: flex; gap: 8px;">
-                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f56;"></div>
-                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
-                <div style="width: 12px; height: 12px; border-radius: 50%; background: #27c93f;"></div>
+    <div class="apple-container">
+        <div class="window-bar">
+            <div class="window-controls">
+                <div class="dot dot-red"></div>
+                <div class="dot dot-yellow"></div>
+                <div class="dot dot-green"></div>
             </div>
-            <div id="stats" class="status-pill">Ready to Code</div>
+            <div id="stats">Characters: 0 | Lines: 1</div>
         </div>
         
-        <div class="editor-wrapper">
+        <div class="editor-main">
             <div id="line-numbers" class="line-numbers">1</div>
-            <textarea id="code" placeholder="<html>
-<body>
-  <h1>Hello World</h1>
-  <script>console.log('Running...');</script>
-</body>
-</html>" spellcheck="false"></textarea>
+            <textarea id="code" placeholder="在此输入 HTML 代码..." spellcheck="false"></textarea>
         </div>
     </div>
 
-    <div class="action-bar">
-        <button class="btn btn-clear" onclick="clearEditor()">
-            <i class="fas fa-trash-alt"></i> 清空
-        </button>
-        <button class="btn btn-run" onclick="runCode()">
-            <i class="fas fa-bolt"></i> 立即运行
-        </button>
+    <div class="action-group">
+        <button class="btn btn-clear" onclick="clearEditor()">清空重置</button>
+        <button class="btn btn-run" onclick="runCode()">预览运行</button>
     </div>
 
     <footer>
-        &copy; <span id="year"></span> <a href="https://www.wangxiansheng.com">王先生</a> 版权所有
+        &copy; <span id="year"></span> <a href="https://www.wangxiansheng.com" target="_blank">王先生</a> 版权所有
     </footer>
 
 <script>
@@ -266,37 +246,30 @@
     function updateStats() {
         const text = codeArea.value;
         const lineCount = text.split('\n').length;
-        stats.textContent = `${text.length} Characters | ${lineCount} Lines`;
+        stats.textContent = `Characters: ${text.length} | Lines: ${lineCount}`;
     }
 
     function runCode() {
         const rawCode = codeArea.value;
         if (!rawCode.trim()) return;
 
-        let finalCode = rawCode;
-        if (!/<meta[^>]*charset=["']?utf-8["']?/i.test(rawCode)) {
-            if (/<head>/i.test(rawCode)) {
-                finalCode = rawCode.replace(/<head>/i, '<head><meta charset="UTF-8">');
-            } else {
+        const newWindow = window.open('about:blank', '_blank');
+        
+        if (newWindow) {
+            newWindow.document.open();
+            let finalCode = rawCode;
+            if (!/<meta[^>]*charset=["']?utf-8["']?/i.test(rawCode)) {
                 finalCode = '<meta charset="UTF-8">' + rawCode;
             }
-        }
-
-        const blob = new Blob([finalCode], { type: 'text/html;charset=UTF-8' });
-        const url = URL.createObjectURL(blob);
-        
-        const newWindow = window.open();
-        if (newWindow) {
-            newWindow.location.href = url;
+            newWindow.document.write(finalCode);
+            newWindow.document.close();
         } else {
-            alert('Popup blocked! Please allow popups to see the preview.');
+            alert('窗口被拦截，请允许弹出窗口！');
         }
-
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
     }
 
     function clearEditor() {
-        if (codeArea.value && confirm('Discard all changes?')) {
+        if (codeArea.value && confirm('确定清空所有代码吗？')) {
             codeArea.value = '';
             renderLineNumbers();
             updateStats();
