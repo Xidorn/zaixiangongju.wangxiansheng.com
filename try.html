@@ -4,15 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="在线 HTML/JS 运行器，支持编辑和运行 HTML/JS 代码。">
-  <meta name="keywords" content="HTML, JS, 代码运行器, 在线编辑器, 开发工具">
-  <meta name="robots" content="index, follow">
-  <meta property="og:title" content="在线 HTML/JS 运行器">
-  <meta property="og:description" content="在线 HTML/JS 运行器，支持编辑和运行 HTML/JS 代码。">
-  <meta property="og:image" content="https://www.wangxiansheng.com/images/logo.png">
-  <meta property="og:url" content="https://zaixiangongju.wangxiansheng.com/try.html">
-  <meta name="author" content="王先生">
-  <title>在线 HTML/JS 运行器</title>
-
+  <title>在线 HTML/JS 运行器 - 增强版</title>
   <style>
     :root {
       --primary-color: #4361ee;
@@ -27,75 +19,32 @@
       --border-radius: 8px;
       --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
       --transition: all 0.3s ease;
+      /* 关键：统一行高和字体，防止对齐错位 */
+      --editor-font-family: 'Fira Code', 'Consolas', monospace;
+      --editor-font-size: 15px;
+      --editor-line-height: 1.6;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
       color: var(--light-color);
-      line-height: 1.6;
       min-height: 100vh;
       padding: 20px;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1200px; margin: 0 auto; }
 
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding-top: 20px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .logo-icon {
-      background: var(--primary-color);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-
+    header { text-align: center; margin-bottom: 30px; }
     h1 {
       font-size: 2.5rem;
-      font-weight: 700;
       background: linear-gradient(90deg, #4cc9f0, #4361ee);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
       margin-bottom: 10px;
-    }
-
-    .subtitle {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    .main-content {
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-      margin-bottom: 30px;
     }
 
     .panel {
@@ -113,305 +62,185 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .panel-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 1.2rem;
-    }
-
-    .panel-title i {
-      color: var(--success-color);
-    }
-
-    .code-stats {
-      color: var(--gray-color);
-      font-size: 0.9rem;
-    }
-
+    /* 编辑器核心容器 */
     .editor-wrapper {
       position: relative;
       height: 500px;
-      overflow: hidden;
+      background: #1e1e1e;
+      display: flex;
     }
 
+    /* 行号区 */
+    .line-numbers {
+      width: 50px;
+      padding: 20px 0;
+      background: rgba(0, 0, 0, 0.2);
+      color: rgba(255, 255, 255, 0.3);
+      text-align: center;
+      font-family: var(--editor-font-family);
+      font-size: var(--editor-font-size);
+      line-height: var(--editor-line-height);
+      user-select: none;
+      overflow: hidden; /* 由 textarea 控制滚动 */
+      flex-shrink: 0;
+    }
+
+    /* 输入区 */
     #code {
-      width: 100%;
+      flex-grow: 1;
       height: 100%;
-      font-family: 'Fira Code', 'Consolas', monospace;
-      font-size: 15px;
-      padding: 20px;
       background: transparent;
       color: #e9ecef;
       border: none;
       resize: none;
-      line-height: 1.5;
-      tab-size: 2;
       outline: none;
+      padding: 20px;
+      font-family: var(--editor-font-family);
+      font-size: var(--editor-font-size);
+      line-height: var(--editor-line-height);
+      tab-size: 2;
       white-space: pre;
-    }
-
-    #code::placeholder {
-      color: rgba(255, 255, 255, 0.3);
+      overflow-x: auto;
     }
 
     .controls {
       display: flex;
       justify-content: center;
       gap: 15px;
-      margin-bottom: 30px;
+      margin: 30px 0;
     }
 
     .btn {
       padding: 14px 28px;
       border-radius: 50px;
       font-weight: 600;
-      font-size: 1rem;
       cursor: pointer;
       border: none;
       transition: var(--transition);
       display: flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .btn-primary {
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-      color: white;
-    }
+    .btn-primary { background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: white; }
+    .btn-danger { background: rgba(247, 37, 133, 0.2); color: #f72585; border: 1px solid rgba(247, 37, 133, 0.3); }
+    .btn:hover { transform: translateY(-3px); opacity: 0.9; }
 
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
-    }
-
-    .btn-danger {
-      background: rgba(247, 37, 133, 0.2);
-      color: #f72585;
-      border: 1px solid rgba(247, 37, 133, 0.3);
-    }
-
-    .btn-danger:hover {
-      background: rgba(247, 37, 133, 0.3);
-      transform: translateY(-3px);
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      margin-top: 30px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 0.9rem;
-    }
-
-    footer a {
-      color: var(--success-color);
-      text-decoration: none;
-      transition: var(--transition);
-    }
-
-    footer a:hover {
-      color: var(--primary-color);
-      text-decoration: underline;
-    }
-
-    .line-numbers {
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 50px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 20px 10px;
-      text-align: right;
-      font-family: 'Fira Code', 'Consolas', monospace;
-      font-size: 15px;
-      color: rgba(255, 255, 255, 0.5);
-      line-height: 1.5;
-      overflow: hidden;
-      user-select: none;
-    }
-
-    /* 滚动条样式 */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(67, 97, 238, 0.5);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(67, 97, 238, 0.7);
-    }
-
-    @media (max-width: 768px) {
-      body {
-        padding: 15px;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .controls {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .btn {
-        width: 100%;
-        max-width: 300px;
-        justify-content: center;
-      }
-    }
+    footer { text-align: center; padding: 20px; color: rgba(255, 255, 255, 0.6); border-top: 1px solid rgba(255, 255, 255, 0.1); }
+    
+    /* 滚动条美化 */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: rgba(67, 97, 238, 0.5); border-radius: 4px; }
   </style>
-  
-  <!-- 加载字体 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div class="container">
     <header>
-      <div class="logo">
-        <div class="logo-icon">
-          <i class="fas fa-code"></i>
-        </div>
-        <h1>在线 HTML/JS 运行器</h1>
-      </div>
-      <p class="subtitle">在浏览器中实时编辑并运行 HTML、CSS 和 JavaScript 代码。无需安装，立即开始编码！</p>
+      <h1>在线 HTML/JS 运行器</h1>
+      <p>实时编辑并运行您的 Web 代码</p>
     </header>
-    
+
     <div class="main-content">
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">
-            <i class="fas fa-file-code"></i>
-            <span>代码编辑器</span>
-          </div>
-          <div class="code-stats">
-            <span id="char-count">0</span> 字符 | <span id="line-count">1</span> 行
-          </div>
+          <div><i class="fas fa-file-code"></i> 代码编辑器</div>
+          <div class="code-stats"><span id="char-count">0</span> 字符 | <span id="line-count">1</span> 行</div>
         </div>
         <div class="editor-wrapper">
           <div class="line-numbers" id="line-numbers">1</div>
-          <textarea id="code" placeholder="在这里输入您的 HTML/JS 代码..."></textarea>
+          <textarea id="code" placeholder="在此输入 HTML/CSS/JS 代码..." spellcheck="false"></textarea>
         </div>
       </div>
     </div>
-    
+
     <div class="controls">
       <button class="btn btn-primary" onclick="runCode()">
-        <i class="fas fa-play"></i>
-        运行代码
+        <i class="fas fa-play"></i> 运行代码
       </button>
       <button class="btn btn-danger" onclick="clearCode()">
-        <i class="fas fa-trash"></i>
-        清空编辑器
+        <i class="fas fa-trash"></i> 清空
       </button>
     </div>
-    
+
     <footer>
-      <p>© <span id="year"></span> <a href="https://www.wangxiansheng.com" target="_blank">王先生</a> 版权所有</p>
+      <p>© <span id="year"></span> <a href="https://www.wangxiansheng.com" style="color: var(--success-color); text-decoration: none;">王先生</a> 版权所有</p>
     </footer>
   </div>
 
   <script>
-    // 设置年份
-    document.getElementById('year').textContent = new Date().getFullYear();
-    
-    // 获取DOM元素
     const codeArea = document.getElementById('code');
     const lineNumbers = document.getElementById('line-numbers');
     const charCount = document.getElementById('char-count');
     const lineCount = document.getElementById('line-count');
-    
-    // 初始化代码编辑器
+
     function initEditor() {
-      // 更新行号
+      document.getElementById('year').textContent = new Date().getFullYear();
+      
       updateLineNumbers();
-      
-      // 更新字符和行数统计
-      updateStats();
-      
-      // 监听输入事件
+
+      // 1. 监听输入
       codeArea.addEventListener('input', () => {
         updateLineNumbers();
         updateStats();
       });
-      
-      // 监听滚动事件以同步行号滚动
+
+      // 2. 关键：同步滚动
       codeArea.addEventListener('scroll', () => {
         lineNumbers.scrollTop = codeArea.scrollTop;
       });
+
+      // 3. 支持 Tab 键缩进
+      codeArea.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = codeArea.selectionStart;
+          const end = codeArea.selectionEnd;
+          codeArea.value = codeArea.value.substring(0, start) + "  " + codeArea.value.substring(end);
+          codeArea.selectionStart = codeArea.selectionEnd = start + 2;
+          updateLineNumbers();
+        }
+      });
     }
-    
-    // 更新行号
+
     function updateLineNumbers() {
       const lines = codeArea.value.split('\n').length;
-      lineNumbers.innerHTML = '';
-      
+      let lineArr = [];
       for (let i = 1; i <= lines; i++) {
-        const lineNumber = document.createElement('div');
-        lineNumber.textContent = i;
-        lineNumbers.appendChild(lineNumber);
+        lineArr.push(`<div>${i}</div>`);
       }
+      lineNumbers.innerHTML = lineArr.join('');
     }
-    
-    // 更新字符和行数统计
+
     function updateStats() {
-      const text = codeArea.value;
-      const chars = text.length;
-      const lines = text.split('\n').length;
-      
-      charCount.textContent = chars;
-      lineCount.textContent = lines;
+      charCount.textContent = codeArea.value.length;
+      lineCount.textContent = codeArea.value.split('\n').length;
     }
-    
-    // 运行代码并在新标签页打开
+
     function runCode() {
       const code = codeArea.value;
-      if (code.trim() === '') {
-        alert('请先输入代码！');
-        return;
-      }
+      if (!code.trim()) return alert('请输入代码');
       
-      const newWindow = window.open("", "_blank");
-      newWindow.document.open();
-      newWindow.document.write(code);
-      newWindow.document.close();
+      // 使用 Blob 创建临时 URL，防止被部分浏览器拦截弹窗
+      const blob = new Blob([code], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // 释放内存（建议在一段时间后执行，或者让用户手动关闭）
+      // URL.revokeObjectURL(url); 
     }
-    
-    // 清空编辑器
+
     function clearCode() {
-      if (codeArea.value.trim() !== '') {
-        if (confirm('确定要清空编辑器吗？所有未保存的代码将会丢失。')) {
-          codeArea.value = '';
-          updateLineNumbers();
-          updateStats();
-        }
-      } else {
-        alert('编辑器已经是空的');
+      if (confirm('确定要清空吗？')) {
+        codeArea.value = '';
+        updateLineNumbers();
+        updateStats();
       }
     }
-    
-    // 页面加载完成后初始化编辑器
+
     document.addEventListener('DOMContentLoaded', initEditor);
   </script>
 </body>
