@@ -1,247 +1,309 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>在线 HTML/JS 运行器</title>
-  <style>
-    :root {
-      --primary-color: #4361ee;
-      --dark-bg: #1a1a2e;
-      --editor-bg: #1e1e1e;
-      --text-color: #f8f9fa;
-      --border-radius: 12px;
-      --editor-font: 'Fira Code', 'Consolas', 'Monaco', 'Microsoft YaHei', monospace;
-      --editor-line-height: 1.6;
-      --editor-size: 15px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoCode | 现代 HTML 运行器</title>
+    <style>
+        :root {
+            --accent-color: #7000ff;
+            --accent-hover: #8a2be2;
+            --bg-color: #050505;
+            --panel-bg: rgba(20, 20, 25, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #e0e0e0;
+            --text-dim: #888;
+            --editor-font: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+        }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      color: var(--text-color);
-      min-height: 100vh;
-      padding: 20px;
-    }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at top right, #1a1a2e, #050505);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
 
-    .container { max-width: 1100px; margin: 0 auto; }
+        /* 顶部标题设计 */
+        header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
 
-    header { text-align: center; margin-bottom: 20px; }
-    h1 {
-      font-size: 2rem;
-      background: linear-gradient(90deg, #4cc9f0, #4361ee);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #fff, #7000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
 
-    .panel {
-      background: rgba(26, 26, 46, 0.9);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-    }
+        header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
 
-    .panel-header {
-      background: #2d2d44;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      color: #aaa;
-    }
+        /* 编辑器容器 */
+        .glass-panel {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
 
-    .editor-container {
-      position: relative;
-      height: 550px;
-      display: flex;
-      background: var(--editor-bg);
-    }
+        .glass-panel:focus-within {
+            border-color: var(--accent-color);
+        }
 
-    .line-numbers {
-      width: 50px;
-      padding: 20px 0;
-      background: rgba(0, 0, 0, 0.3);
-      color: #555;
-      text-align: center;
-      font-family: var(--editor-font);
-      font-size: var(--editor-size);
-      line-height: var(--editor-line-height);
-      user-select: none;
-      overflow: hidden;
-    }
+        /* 编辑器头部状态栏 */
+        .panel-top {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-    textarea#code {
-      flex: 1;
-      height: 100%;
-      background: transparent;
-      color: #e0e0e0;
-      border: none;
-      resize: none;
-      outline: none;
-      padding: 20px;
-      font-family: var(--editor-font);
-      font-size: var(--editor-size);
-      line-height: var(--editor-line-height);
-      tab-size: 4;
-      white-space: pre;
-      overflow: auto;
-    }
+        .status-pill {
+            background: rgba(112, 0, 255, 0.1);
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
 
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 25px;
-    }
+        /* 代码区域 */
+        .editor-wrapper {
+            display: flex;
+            height: 500px;
+            position: relative;
+        }
 
-    .btn {
-      padding: 12px 30px;
-      border-radius: 50px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .line-numbers {
+            width: 60px;
+            padding-top: 20px;
+            text-align: right;
+            padding-right: 15px;
+            font-family: var(--editor-font);
+            font-size: 14px;
+            color: #444;
+            background: rgba(0,0,0,0.2);
+            user-select: none;
+            overflow: hidden;
+        }
 
-    .btn-run { background: var(--primary-color); color: white; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4); }
-    .btn-clear { background: rgba(255,255,255,0.1); color: #ccc; }
-    .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        textarea#code {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #dcdcdc;
+            padding: 20px;
+            font-family: var(--editor-font);
+            font-size: 15px;
+            line-height: 1.6;
+            resize: none;
+            caret-color: var(--accent-color);
+        }
 
-    footer { text-align: center; margin-top: 30px; opacity: 0.5; font-size: 0.8rem; }
+        /* 按钮设计 */
+        .action-bar {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+        }
 
-    ::-webkit-scrollbar { width: 10px; height: 10px; }
-    ::-webkit-scrollbar-thumb { background: #4361ee66; border-radius: 5px; }
-  </style>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        .btn {
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid transparent;
+        }
+
+        .btn-run {
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(112, 0, 255, 0.5);
+        }
+
+        .btn-run:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(112, 0, 255, 0.6);
+        }
+
+        .btn-clear {
+            background: transparent;
+            color: var(--text-dim);
+            border-color: var(--border-color);
+        }
+
+        .btn-clear:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 40px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+
+        footer a { color: var(--accent-color); text-decoration: none; }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <div class="container">
     <header>
-      <h1>在线 HTML/JS 运行器</h1>
+        <h1>王<span style="color:var(--accent-color)">先生</span></h1>
+        <p>HTML在线运行</p>
     </header>
 
-    <div class="panel">
-      <div class="panel-header">
-        <span><i class="fas fa-code"></i> UTF-8 代码编辑器</span>
-        <span id="stats">字符: 0 | 行数: 1</span>
-      </div>
-      <div class="editor-container">
-        <div id="line-numbers" class="line-numbers">1</div>
-        <textarea id="code" placeholder="在此输入 HTML 代码，点击运行即可在新标签页完整预览..." spellcheck="false"></textarea>
-      </div>
+    <div class="glass-panel">
+        <div class="panel-top">
+            <div style="display: flex; gap: 8px;">
+                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f56;"></div>
+                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+                <div style="width: 12px; height: 12px; border-radius: 50%; background: #27c93f;"></div>
+            </div>
+            <div id="stats" class="status-pill">Ready to Code</div>
+        </div>
+        
+        <div class="editor-wrapper">
+            <div id="line-numbers" class="line-numbers">1</div>
+            <textarea id="code" placeholder="<html>
+<body>
+  <h1>Hello World</h1>
+  <script>console.log('Running...');</script>
+</body>
+</html>" spellcheck="false"></textarea>
+        </div>
     </div>
 
-    <div class="controls">
-      <button class="btn btn-run" onclick="runCode()">
-        <i class="fas fa-play"></i> 运行预览
-      </button>
-      <button class="btn btn-clear" onclick="clearEditor()">
-        <i class="fas fa-eraser"></i> 清空
-      </button>
+    <div class="action-bar">
+        <button class="btn btn-clear" onclick="clearEditor()">
+            <i class="fas fa-trash-alt"></i> 清空
+        </button>
+        <button class="btn btn-run" onclick="runCode()">
+            <i class="fas fa-bolt"></i> 立即运行
+        </button>
     </div>
 
     <footer>
-      © <span id="year"></span> <a href="https://www.wangxiansheng.com" title="王先生">王先生</a> 版权所有
+        &copy; <span id="year"></span> <a href="https://www.wangxiansheng.com">王先生</a> 版权所有
     </footer>
-  </div>
 
 <script>
-  const codeArea = document.getElementById('code');
-  const lineNumbers = document.getElementById('line-numbers');
-  const stats = document.getElementById('stats');
+    const codeArea = document.getElementById('code');
+    const lineNumbers = document.getElementById('line-numbers');
+    const stats = document.getElementById('stats');
 
-  function init() {
-    document.getElementById('year').textContent = new Date().getFullYear();
-    
-    // 同步滚动
-    codeArea.addEventListener('scroll', () => {
-      lineNumbers.scrollTop = codeArea.scrollTop;
-    });
+    function init() {
+        document.getElementById('year').textContent = new Date().getFullYear();
+        
+        codeArea.addEventListener('scroll', () => {
+            lineNumbers.scrollTop = codeArea.scrollTop;
+        });
 
-    // 监听输入
-    codeArea.addEventListener('input', () => {
-      renderLineNumbers();
-      updateStats();
-    });
+        codeArea.addEventListener('input', () => {
+            renderLineNumbers();
+            updateStats();
+        });
 
-    // Tab 键处理 (插入4个空格)
-    codeArea.addEventListener('keydown', (e) => {
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        const start = codeArea.selectionStart;
-        const end = codeArea.selectionEnd;
-        codeArea.value = codeArea.value.substring(0, start) + "    " + codeArea.value.substring(end);
-        codeArea.selectionStart = codeArea.selectionEnd = start + 4;
-        renderLineNumbers();
-        updateStats();
-      }
-    });
-  }
-
-  function renderLineNumbers() {
-    const lines = codeArea.value.split('\n').length;
-    let html = '';
-    for (let i = 1; i <= lines; i++) {
-      html += `<div>${i}</div>`;
-    }
-    lineNumbers.innerHTML = html;
-  }
-
-  function updateStats() {
-    const text = codeArea.value;
-    stats.textContent = `字符: ${text.length} | 行数: ${text.split('\n').length}`;
-  }
-
-  function runCode() {
-    const rawCode = codeArea.value;
-    if (!rawCode.trim()) return alert('请先输入代码！');
-
-    // 核心逻辑：
-    // 1. 如果用户没写 <meta charset="UTF-8">，我们自动给它补上，防止预览乱码。
-    // 2. 使用 Blob 对象的 utf-8 配置。
-    let finalCode = rawCode;
-    
-    if (!/<meta[^>]*charset=["']?utf-8["']?/i.test(rawCode)) {
-      if (/<head>/i.test(rawCode)) {
-        finalCode = rawCode.replace(/<head>/i, '<head><meta charset="UTF-8">');
-      } else {
-        finalCode = '<meta charset="UTF-8">' + rawCode;
-      }
+        codeArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = codeArea.selectionStart;
+                const end = codeArea.selectionEnd;
+                codeArea.value = codeArea.value.substring(0, start) + "    " + codeArea.value.substring(end);
+                codeArea.selectionStart = codeArea.selectionEnd = start + 4;
+                renderLineNumbers();
+                updateStats();
+            }
+        });
     }
 
-    // 创建 Blob 对象并显式指定编码
-    const blob = new Blob([finalCode], { type: 'text/html;charset=UTF-8' });
-    const url = URL.createObjectURL(blob);
-    
-    // 打开新窗口
-    const newWindow = window.open();
-    if (newWindow) {
-      newWindow.location.href = url;
-    } else {
-      alert('请允许弹出窗口以进行预览！');
+    function renderLineNumbers() {
+        const lines = codeArea.value.split('\n').length;
+        let html = '';
+        for (let i = 1; i <= lines; i++) {
+            html += `<div>${i}</div>`;
+        }
+        lineNumbers.innerHTML = html;
     }
 
-    // 释放 URL 对象（延迟以防加载中断）
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  }
-
-  function clearEditor() {
-    if (confirm('确定要清空吗？')) {
-      codeArea.value = '';
-      renderLineNumbers();
-      updateStats();
+    function updateStats() {
+        const text = codeArea.value;
+        const lineCount = text.split('\n').length;
+        stats.textContent = `${text.length} Characters | ${lineCount} Lines`;
     }
-  }
 
-  init();
+    function runCode() {
+        const rawCode = codeArea.value;
+        if (!rawCode.trim()) return;
+
+        let finalCode = rawCode;
+        if (!/<meta[^>]*charset=["']?utf-8["']?/i.test(rawCode)) {
+            if (/<head>/i.test(rawCode)) {
+                finalCode = rawCode.replace(/<head>/i, '<head><meta charset="UTF-8">');
+            } else {
+                finalCode = '<meta charset="UTF-8">' + rawCode;
+            }
+        }
+
+        const blob = new Blob([finalCode], { type: 'text/html;charset=UTF-8' });
+        const url = URL.createObjectURL(blob);
+        
+        const newWindow = window.open();
+        if (newWindow) {
+            newWindow.location.href = url;
+        } else {
+            alert('Popup blocked! Please allow popups to see the preview.');
+        }
+
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+
+    function clearEditor() {
+        if (codeArea.value && confirm('Discard all changes?')) {
+            codeArea.value = '';
+            renderLineNumbers();
+            updateStats();
+        }
+    }
+
+    init();
 </script>
 </body>
 </html>
