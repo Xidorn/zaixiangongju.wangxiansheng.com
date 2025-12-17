@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码美化大师 - 王先生工具箱</title>
+    <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-postcss.js"></script>
+    <script src="https://unpkg.com/prettier@2.8.8/parser-babel.js"></script>
+    
+    <style>
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-card: rgba(255, 255, 255, 0.9);
+            --apple-text: #1d1d1f;
+            --apple-blue: #0071e3;
+            --apple-gray: #86868b;
+            --border-radius: 24px;
+            --editor-font: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-size: 2.8rem; font-weight: 600; letter-spacing: -0.04em; margin-bottom: 6px; }
+        header p { color: var(--apple-gray); font-size: 16px; }
+
+        .apple-container {
+            width: 100%;
+            max-width: 1280px; 
+            background: var(--apple-card);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--border-radius);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .window-bar {
+            height: 64px;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.6);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .window-controls { display: flex; gap: 8px; width: 100px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+
+        .toolbar-center { display: flex; gap: 12px; align-items: center; }
+        select {
+            background: #ededef; border: none; padding: 8px 16px; border-radius: 10px;
+            font-size: 13px; font-weight: 500; outline: none; cursor: pointer;
+        }
+
+        .toolbar-right { display: flex; gap: 12px; }
+        .btn-mini {
+            padding: 8px 18px; border-radius: 12px; font-size: 13px; font-weight: 600;
+            border: none; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-copy { background: var(--apple-blue); color: white; }
+        .btn-clear { background: rgba(0,0,0,0.05); color: var(--apple-text); }
+
+        /* 编辑器区域布局 */
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 650px;
+            background: #fff;
+        }
+
+        .pane { display: flex; flex-direction: column; overflow: hidden; }
+        .pane-label {
+            padding: 12px 24px; font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.12em; color: var(--apple-gray); font-weight: 700;
+            background: #fcfcfd; border-bottom: 1px solid rgba(0,0,0,0.03);
+        }
+
+        /* 编辑核心：包含行号 */
+        .editor-box { display: flex; flex: 1; overflow: hidden; position: relative; }
+        
+        .line-numbers {
+            width: 45px;
+            background: #f8f8f9;
+            color: #c1c1c7;
+            font-family: var(--editor-font);
+            font-size: 14px;
+            line-height: 1.7;
+            padding: 30px 0;
+            text-align: center;
+            user-select: none;
+            border-right: 1px solid rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+
+        textarea {
+            flex: 1; background: transparent; border: none; outline: none;
+            padding: 30px; font-family: var(--editor-font); font-size: 15px;
+            line-height: 1.7; resize: none; overflow-y: auto;
+        }
+
+        #inputCode { color: #1d1d1f; }
+        #outputCode { background: #1e1e1e; color: #9cdcfe; border-left: 1px solid #333; }
+
+        #status-info {
+            position: absolute; bottom: 20px; right: 20px; font-size: 12px;
+            color: #71717a; background: rgba(255,255,255,0.1); padding: 4px 12px;
+            border-radius: 20px; pointer-events: none; z-index: 5;
+        }
+
+        footer { margin: 40px 0; text-align: center; color: var(--apple-gray); font-size: 14px; }
+        footer a { color: var(--apple-blue); text-decoration: none; font-weight: 600; }
+
+        /* 隐藏滚动条但保留功能 */
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Code Beauty</h1>
+        <p>王先生专为开发者打造的实时代码美化工具</p>
+    </header>
+
+    <div class="apple-container">
+        <div class="window-bar">
+            <div class="window-controls">
+                <div class="dot dot-red"></div>
+                <div class="dot dot-yellow"></div>
+                <div class="dot dot-green"></div>
+            </div>
+            
+            <div class="toolbar-center">
+                <select id="language" onchange="formatAction()">
+                    <option value="html">HTML 文件</option>
+                    <option value="css">CSS 样式</option>
+                    <option value="babel">JavaScript</option>
+                </select>
+                <select id="tabWidth" onchange="formatAction()">
+                    <option value="2">2 空格</option>
+                    <option value="4" selected>4 空格</option>
+                </select>
+            </div>
+
+            <div class="toolbar-right">
+                <button class="btn-mini btn-clear" onclick="clearAll()">清空内容</button>
+                <button class="btn-mini btn-copy" onclick="copyResult()">复制美化代码</button>
+            </div>
+        </div>
+        
+        <div class="editor-wrapper">
+            <div class="pane">
+                <div class="pane-label">源代码 (输入)</div>
+                <div class="editor-box">
+                    <div id="line-numbers-input" class="line-numbers">1</div>
+                    <textarea id="inputCode" placeholder="在此粘贴代码..." spellcheck="false" onscroll="syncScroll('input')"></textarea>
+                </div>
+            </div>
+            <div class="pane">
+                <div class="pane-label">美化结果 (输出)</div>
+                <div class="editor-box">
+                    <div id="line-numbers-output" class="line-numbers" style="background:#252525; color:#555; border-right:1px solid #333;">1</div>
+                    <textarea id="outputCode" readonly spellcheck="false" onscroll="syncScroll('output')"></textarea>
+                    <div id="status-info">Ready</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; <span id="year"></span> <a href="https://www.wangxiansheng.com" target="_blank">王先生</a> 版权所有
+    </footer>
+
+    <script>
+        const inputArea = document.getElementById('inputCode');
+        const outputArea = document.getElementById('outputCode');
+        const lineNoInput = document.getElementById('line-numbers-input');
+        const lineNoOutput = document.getElementById('line-numbers-output');
+        const statusInfo = document.getElementById('status-info');
+        let debounceTimer;
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // 同步行号渲染
+        function updateLineNumbers(area, lineContainer) {
+            const lines = area.value.split('\n').length;
+            let html = '';
+            for (let i = 1; i <= lines; i++) {
+                html += `<div>${i}</div>`;
+            }
+            lineContainer.innerHTML = html;
+        }
+
+        // 同步滚动
+        function syncScroll(type) {
+            if (type === 'input') {
+                lineNoInput.scrollTop = inputArea.scrollTop;
+            } else {
+                lineNoOutput.scrollTop = outputArea.scrollTop;
+            }
+        }
+
+        function formatAction() {
+            const input = inputArea.value;
+            const lang = document.getElementById('language').value;
+            const tabSize = parseInt(document.getElementById('tabWidth').value);
+
+            // 更新输入行号
+            updateLineNumbers(inputArea, lineNoInput);
+
+            if (!input.trim()) {
+                outputArea.value = '';
+                updateLineNumbers(outputArea, lineNoOutput);
+                statusInfo.innerText = "Ready";
+                return;
+            }
+
+            try {
+                const formatted = prettier.format(input, {
+                    parser: lang,
+                    plugins: prettierPlugins,
+                    tabWidth: tabSize,
+                });
+                outputArea.value = formatted;
+                statusInfo.innerText = "Success";
+                statusInfo.style.color = "#10b981";
+                // 格式化成功后更新输出行号
+                setTimeout(() => updateLineNumbers(outputArea, lineNoOutput), 10);
+            } catch (err) {
+                statusInfo.innerText = "Waiting...";
+                statusInfo.style.color = "#f59e0b";
+            }
+        }
+
+        inputArea.addEventListener('input', () => {
+            statusInfo.innerText = "Processing...";
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(formatAction, 400);
+        });
+
+        function copyResult() {
+            if (!outputArea.value) return;
+            navigator.clipboard.writeText(outputArea.value).then(() => {
+                const oldText = statusInfo.innerText;
+                statusInfo.innerText = "✅ 已复制";
+                setTimeout(() => statusInfo.innerText = oldText, 1500);
+            });
+        }
+
+        function clearAll() {
+            if (inputArea.value && confirm('确定清空编辑器吗？')) {
+                inputArea.value = '';
+                outputArea.value = '';
+                formatAction();
+            }
+        }
+
+        // 快捷键支持
+        inputArea.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
+                formatAction();
+            }
+        });
+    </script>
+</body>
+</html>
